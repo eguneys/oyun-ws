@@ -11,7 +11,7 @@ final class EventBus[Event, Channel, Subscriber](
 
   def subscribe(channel: Channel, subscriber: Subscriber): Unit =
     entries.compute(channel, (_, subs) => {
-      println(s"${channel}, ${sizeOf(channel)}")
+      // println(s"${channel}, ${sizeOf(channel)}")
       Option(subs).fold(Set(subscriber))(_ + subscriber)
     })
 

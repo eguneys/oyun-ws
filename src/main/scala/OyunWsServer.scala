@@ -12,11 +12,12 @@ object Boot extends App {
   implicit def scheduler: Scheduler = clientSystem.scheduler
   implicit def executionContext: ExecutionContext = clientSystem.executionContext
 
+  lazy val oyunRedis = wire[Oyun]
+  lazy val roundCrowd = wire[RoundCrowd]
+  lazy val services = wire[Services]
   lazy val auth = wire[Auth]
   lazy val mongo = wire[Mongo]
   lazy val lobby = wire[Lobby]
-  lazy val roundCrowd = wire[RoundCrowd]
-  lazy val services = wire[Services]
   lazy val controller = wire[Controller]
   lazy val router = wire[Router]
   lazy val nettyServer = wire[netty.NettyServer]
