@@ -4,16 +4,34 @@ import akka.actor.typed.scaladsl.{ ActorContext }//, Behaviors }
 // import akka.actor.typed.Behavior
 
 import ipc._
+import util.Util.nowSeconds
 
 object ClientActor {
 
-  case class State()
+  case class State(
+    lastPing: Int = nowSeconds)
 
 
   def onStart(deps: Deps, ctx: ActorContext[ClientMsg]): Unit = {
     OyunWsServer.connections.incrementAndGet
-
+    busChansOf(deps.req) foreach { Bus.subscribe(_, ctx.self) }
   }
+
+  def onStop(state: State, deps: Deps, ctx: ActorContext[ClientMsg]): Unit = {
+    import deps._
+    OyunWsServer.connections.decrementAndGet
+    busChansOf(req) foreach { Bus.unsubscribe(_, ctx.self) }
+  }
+
+  def sitePing(state: State, deps: Deps, msg: ClientOut.Ping): State = {
+    // for { l <- msg.lag, u <- deps.req.user } 
+    //   deps.services.lag(u.id -> l)
+    state.copy(lastPing = nowSeconds)
+  }
+
+
+  private def busChansOf(req: Req) =
+    Bus.channel.all :: Bus.channel.sri(req.sri) :: Nil
 
   def Req(req: util.RequestHeader, sri: Sri, user: Option[User]): Req = Req(
     name = req.name,

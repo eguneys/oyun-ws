@@ -29,6 +29,18 @@ final class Controller(
     )
   }
 
+  def lobby(req: RequestHeader, emit: ClientEmit) = WebSocket(req) { sri => user =>
+    Future successful endpoint(
+      name = "lobby",
+      behavior = LobbyClientActor start {
+        Deps(emit, Req(req, sri, user), services)
+      },
+      credits = 30,
+      interval = 30.seconds
+    )
+  }
+
+
 
   private def WebSocket(req: RequestHeader)(f: Sri => Option[User] => Response): Response =
     ValidSri(req) { sri =>

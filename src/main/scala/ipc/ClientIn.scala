@@ -1,7 +1,7 @@
 package oyun.ws
 package ipc
 
-// import play.api.libs.json._
+import play.api.libs.json._
 
 sealed trait ClientIn extends ClientMsg {
   def write: String
@@ -19,6 +19,14 @@ object ClientIn {
 
   case object Disconnect extends ClientIn {
     val write = cliMsg("bye")
+  }
+
+  case class LobbyPong(members: Int, rounds: Int) extends ClientIn {
+    val write = Json stringify Json.obj(
+      "t" -> "n",
+      "d" -> members,
+      "r" -> rounds
+    )
   }
 
   // private def cliMsg[A: Writes](t: String, data: A): String = Json stringify Json.obj(

@@ -32,10 +32,14 @@ extends SimpleChannelInboundHandler[WebSocketFrame] {
             Option(ctx.channel.attr(key.client).get) match {
               case Some(clientFu) =>
                 clientFu.value match {
-                  case Some(client) => client foreach (_ ! out)
-                  case None => clientFu foreach (_ ! out)
+                  case Some(client) =>
+                    client foreach (_ ! out)
+                  case None =>
+                    clientFu foreach (_ ! out)
                 }
-              case None => logger.warn(s"No client actor to receive $out")
+              case None => {
+                logger.warn(s"No client actor to receive $out")
+              }
             }
         }
       }

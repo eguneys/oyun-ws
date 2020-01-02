@@ -15,12 +15,14 @@ final class Auth(mongo: Mongo)(implicit executionContext: ExecutionContext) {
             BSONDocument("_id" -> sid, "up" -> true),
             Some(BSONDocument("_id" -> false, "user" -> true))
           ).one[BSONDocument]
-        } map {
-          _ flatMap {
+        } map { p =>
+          p flatMap {
             _.getAsOpt[User.ID]("user") map User.apply
           }
         }
-      case None => Future successful None
+      case None => {
+        Future successful None
+      }
     }
 
   private val cookieName = "oyun2"

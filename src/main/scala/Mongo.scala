@@ -15,7 +15,7 @@ final class Mongo(config: Config)(implicit executionContext: ExecutionContext) {
   private val parsedUri = MongoConnection.parseURI(uri)
   private val connection = Future.fromTry(parsedUri).flatMap(driver.connect)
 
-  private def db: Future[DefaultDB] = connection.flatMap(_ database "oyunkeyf")
+  private def db: Future[DefaultDB] = connection.flatMap(_ database parsedUri.get.db.get)
   private def collNamed(name: String) = db.map(_ collection name)(parasitic)
   def securityColl = collNamed("security")
 
