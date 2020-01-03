@@ -68,6 +68,7 @@ final class Oyun(config: Config)
     val emit: Emit[In] = in => {
       val msg = in.write
       val path = msg.takeWhile(' '.!=)
+      println(msg)
       if (status.isOnline) {
         connIn.async.publish(chan.in, msg)
       } else if (in.critical) {

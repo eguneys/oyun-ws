@@ -2,6 +2,7 @@ package oyun.ws
 package netty
 
 
+import com.typesafe.scalalogging.Logger
 import io.netty.channel._
 import io.netty.handler.codec.http._
 import io.netty.handler.codec.http.websocketx._
@@ -31,9 +32,12 @@ extends WebSocketServerProtocolHandler(
   import ProtocolHandler._
   import Controller.Endpoint
 
+  private val logger = Logger(getClass)
+
   override def userEventTriggered(ctx: ChannelHandlerContext, evt: java.lang.Object): Unit = {
     evt match {
       case hs: WebSocketServerProtocolHandler.HandshakeComplete =>
+        logger.info("handshake complete")
         val promise = Promise[Client]
         ctx.channel.attr(key.client).set(promise.future)
         router(
@@ -47,6 +51,7 @@ extends WebSocketServerProtocolHandler(
             connectActorToChannel(client, ctx.channel, promise)
         }
       case _ =>
+        logger.info("user event triggered other")
     }
     super.userEventTriggered(ctx, evt)
   }
@@ -95,24 +100,31 @@ extends WebSocketServerProtocolHandler(
     // IO exceptions happen all the time, it usually just means that the client has closed the connection before fully
     // sending/receiving the response.
     case _: IOException =>
+      logger.error("wse io")
       //Monitor.websocketError("io")
       ctx.channel.close()
     case _: WebSocketHandshakeException =>
+      logger.error("wse handshake")
       //Monitor.websocketError("handshake")
       ctx.channel.close()
     case e: CorruptedWebSocketFrameException
         if Option(e.getMessage).exists(_ startsWith "Max frame length") =>
+      logger.error("wse framelength")
       //Monitor.websocketError("frameLength")
     case _: CorruptedWebSocketFrameException =>
+      logger.error("wse corrupted")
       //Monitor.websocketError("corrupted")
     case _: TooLongFrameException =>
+      logger.error("wse uritoolong")
       //Monitor.websocketError("uriTooLong")
       sendSimpleErrorResponse(ctx.channel, HttpResponseStatus.REQUEST_URI_TOO_LONG)
     case e: IllegalArgumentException
         if Option(e.getMessage).exists(_ contains "Header value contains a prohibited character") =>
+      logger.error("wse headerillegal")
       //Monitor.websocketError("headerIllegalChar")
       sendSimpleErrorResponse(ctx.channel, HttpResponseStatus.BAD_REQUEST)
     case _ =>
+      logger.error("wse other")
       //Monitor.websocketError("other")
       super.exceptionCaught(ctx, cause)
   }

@@ -2,6 +2,8 @@ package oyun.ws
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ Behavior, PostStop }
+import play.api.libs.json._
+
 
 import ipc._
 
@@ -15,10 +17,10 @@ object LobbyClientActor {
   import ClientActor._
 
   def start(deps: Deps): Behavior[ClientMsg] = Behaviors.setup { ctx =>
-    // import deps._
+    import deps._
     onStart(deps, ctx)
-    // req.user foreach { users.connect(_, ctx.self, silently = true) }
-    // services.lobby.connect(req.sri -> req.user.map(_.id))
+    req.user foreach { users.connect(_, ctx.self, silently = true) }
+    services.lobby.connect(req.sri -> req.user.map(_.id))
     // Bus.subscribe(Bus.channel.lobby, ctx.self)
     apply(State(), deps)
   }
@@ -29,17 +31,25 @@ object LobbyClientActor {
       .receive[ClientMsg] { (ctx, msg) =>
         import deps._
 
+        def forward(payload: JsValue): Unit =
+          oyunIn.lobby(OyunIn.TellSri(req.sri, req.user.map(_.id), payload))
+
         msg match {
           case msg: ClientOut.Ping =>
             clientIn(services.lobby.pong.get)
             apply(state.copy(site = sitePing(state.site, deps, msg)), deps)
-          case _ => Behaviors.same
+          case ClientOut.LobbyForward(payload) =>
+            forward(payload)
+            Behaviors.same
+          case _ => 
+            Behaviors.same
         }
 
       }
       .receiveSignal {
         case (ctx, PostStop) =>
           onStop(state.site, deps, ctx)
+          deps.services.lobby.disconnect(deps.req.sri)
           Behaviors.same
       }
 }

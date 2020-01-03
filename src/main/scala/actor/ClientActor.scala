@@ -54,6 +54,9 @@ object ClientActor {
     req: Req,
     services: Services) {
 
+    def oyunIn = services.oyun
+    def users = services.users
+
   }
   
 }

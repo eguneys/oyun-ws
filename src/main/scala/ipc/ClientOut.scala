@@ -21,6 +21,10 @@ object ClientOut {
 
   case object Ignore extends ClientOutSite
 
+  // lobby
+
+  case class LobbyForward(payload: JsValue) extends ClientOutLobby
+
 
   def parse(str: String): Try[ClientOut] =
     if (str == "null" || str == """{"t":"p"}""") emptyPing
@@ -29,6 +33,8 @@ object ClientOut {
         case o: JsObject =>
           o str "t" flatMap {
             case "p" => Some(Ping(o int "l"))
+            case "hookIn" | "hookOut" =>
+              Some(LobbyForward(o))
           } getOrElse Unexpected(o)
         case js => Unexpected(js)
       }
