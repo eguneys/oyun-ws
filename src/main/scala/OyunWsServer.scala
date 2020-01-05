@@ -14,6 +14,7 @@ object Boot extends App {
 
   lazy val groupedWithin = wire[util.GroupedWithin]
   lazy val oyunRedis = wire[Oyun]
+  lazy val oyunHandlers = wire[OyunHandler]
   lazy val roundCrowd = wire[RoundCrowd]
   lazy val services = wire[Services]
   lazy val users = wire[Users]
@@ -30,6 +31,7 @@ object Boot extends App {
 
 final class OyunWsServer(
   nettyServer: netty.NettyServer,
+  handlers: OyunHandler, // must eagerly instanciate!
   monitor: Monitor
 )() {
 

@@ -29,6 +29,12 @@ object ClientIn {
     )
   }
 
+  case class Payload(json: JsonString) extends ClientIn {
+    def write = json.value
+  }
+
+  def payload(js: JsValue) = Payload(JsonString(Json stringify js))
+
   // private def cliMsg[A: Writes](t: String, data: A): String = Json stringify Json.obj(
   //   "t" -> t,
   //   "d" -> data

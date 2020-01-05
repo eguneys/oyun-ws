@@ -29,6 +29,12 @@ object ClientActor {
     state.copy(lastPing = nowSeconds)
   }
 
+  def clientInReceive(state: State, deps: Deps, msg: ClientIn): Option[State] = msg match {
+    case in: ClientIn =>
+      deps clientIn in
+      None
+  }
+
 
   private def busChansOf(req: Req) =
     Bus.channel.all :: Bus.channel.sri(req.sri) :: Nil

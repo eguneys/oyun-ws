@@ -3,7 +3,7 @@ package oyun.ws
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.Logger
 import io.lettuce.core._
-// import io.lettuce.core.pubsub._
+import io.lettuce.core.pubsub._
 import java.util.concurrent.ConcurrentLinkedQueue
 import scala.annotation.tailrec
 import scala.concurrent.duration._
@@ -49,6 +49,16 @@ final class Oyun(config: Config)
   private val connIn = redis.connectPubSub
   private val connOut = redis.connectPubSub
 
+
+
+  private val handlersPromise = Promise[Handlers]
+  private val futureHandlers: Future[Handlers] = handlersPromise.future
+  private var handlers: Handlers = chan => out => futureHandlers foreach { _(chan)(out) }
+  def setHandlers(hs: Handlers) = {
+    handlers = hs
+    handlersPromise success hs
+  }
+
   val emit: Emits = Await.result({
     logger.info(s"Redis connection")
     connectAll
@@ -68,7 +78,7 @@ final class Oyun(config: Config)
     val emit: Emit[In] = in => {
       val msg = in.write
       val path = msg.takeWhile(' '.!=)
-      println(msg)
+      // println(msg)
       if (status.isOnline) {
         connIn.async.publish(chan.in, msg)
       } else if (in.critical) {
@@ -89,6 +99,16 @@ final class Oyun(config: Config)
     promise.future
   }
   
+  connOut.addListener(new RedisPubSubAdapter[String, String] {
+    override def message(chan: String, msg: String): Unit = {
+      OyunOut read msg match {
+        case Some(out) => 
+          handlers(chan)(out)
+        case None => logger.warn(s"Can't parse $msg on $chan")
+      }
+    }
+  })
+
 }
 
 object Oyun {
@@ -96,6 +116,8 @@ object Oyun {
   sealed trait Status
   case object Online extends Status
   case object Offline extends Status
+
+  type Handlers = String => Emit[OyunOut]
 
   sealed abstract class Chan(value: String) {
     val in = s"$value-in"

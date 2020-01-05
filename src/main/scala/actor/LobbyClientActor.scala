@@ -35,6 +35,11 @@ object LobbyClientActor {
           oyunIn.lobby(OyunIn.TellSri(req.sri, req.user.map(_.id), payload))
 
         msg match {
+          case in: ClientIn =>
+            clientInReceive(state.site, deps, in) match {
+              case None => Behaviors.same
+              case Some(s) => apply(state.copy(site = s), deps)
+            }
           case msg: ClientOut.Ping =>
             clientIn(services.lobby.pong.get)
             apply(state.copy(site = sitePing(state.site, deps, msg)), deps)

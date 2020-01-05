@@ -33,7 +33,7 @@ object ClientOut {
         case o: JsObject =>
           o str "t" flatMap {
             case "p" => Some(Ping(o int "l"))
-            case "hookIn" | "hookOut" =>
+            case "join" | "hookIn" | "hookOut" =>
               Some(LobbyForward(o))
           } getOrElse Unexpected(o)
         case js => Unexpected(js)
