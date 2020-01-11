@@ -29,6 +29,25 @@ object ClientActor {
     state.copy(lastPing = nowSeconds)
   }
 
+  def globalReceive(
+    state: State,
+    deps: Deps,
+    ctx: ActorContext[ClientMsg],
+    msg: ClientOutSite
+  ): State = {
+    import deps._
+
+    msg match {
+      case msg: ClientOut.Ping =>
+        clientIn(ClientIn.Pong)
+        sitePing(state, deps, msg)
+      case ClientOut.Ignore =>
+        state
+      case _ =>
+        state
+    }
+  }
+
   def clientInReceive(state: State, deps: Deps, msg: ClientIn): Option[State] = msg match {
     case in: ClientIn =>
       deps clientIn in

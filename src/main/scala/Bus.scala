@@ -34,6 +34,7 @@ object Bus {
     def sri(s: Sri) = s"sri/${s.value}"
     val all = "all"
     val lobby = "lobby"
+    def room(id: RoomId) = s"room/$id"
   }
 
   def msg(event: ClientMsg, chan: ChanSelect) =

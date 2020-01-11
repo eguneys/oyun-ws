@@ -65,12 +65,14 @@ final class Oyun(config: Config)
   }, 3.seconds)
 
   private def connectAll: Future[Emits] =
-    connect[OyunIn.Lobby](chans.lobby) map {
-      case lobby =>
-        new Emits(
-          lobby
-        )
-    }
+    connect[OyunIn.Lobby](chans.lobby) zip
+      connect[OyunIn.Masa](chans.masa) map {
+        case lobby ~ masa =>
+          new Emits(
+            lobby,
+            masa
+          )
+      }
 
 
   private def connect[In <: OyunIn](chan: Chan): Future[Emit[In]] = {
@@ -78,7 +80,7 @@ final class Oyun(config: Config)
     val emit: Emit[In] = in => {
       val msg = in.write
       val path = msg.takeWhile(' '.!=)
-      // println(msg)
+      println(s"${chan.out} $msg")
       if (status.isOnline) {
         connIn.async.publish(chan.in, msg)
       } else if (in.critical) {
@@ -126,10 +128,12 @@ object Oyun {
 
   object chans {
     object lobby extends Chan("lobby")
+    object masa extends Chan("m")
   }
 
   final class Emits(
-    val lobby: Emit[OyunIn.Lobby]
+    val lobby: Emit[OyunIn.Lobby],
+    val masa: Emit[OyunIn.Masa]
   )
   
 }

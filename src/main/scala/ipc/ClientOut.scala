@@ -10,6 +10,7 @@ sealed trait ClientOut extends ClientMsg
 
 sealed trait ClientOutSite extends ClientOut
 sealed trait ClientOutLobby extends ClientOut
+sealed trait ClientOutMasa extends ClientOut
 
 object ClientOut {
 
@@ -26,6 +27,11 @@ object ClientOut {
   case class LobbyForward(payload: JsValue) extends ClientOutLobby
 
 
+  // round
+
+  case class MasaPlayerForward(payload: JsValue) extends ClientOutMasa
+  case class MasaSit(side: String) extends ClientOutMasa
+
   def parse(str: String): Try[ClientOut] =
     if (str == "null" || str == """{"t":"p"}""") emptyPing
     else
@@ -35,6 +41,11 @@ object ClientOut {
             case "p" => Some(Ping(o int "l"))
             case "join" | "hookIn" | "hookOut" =>
               Some(LobbyForward(o))
+            case "sit" =>
+              for {
+                side <- o str "d"
+              } yield MasaSit(side)
+            case _ => None
           } getOrElse Unexpected(o)
         case js => Unexpected(js)
       }

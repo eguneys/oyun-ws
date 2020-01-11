@@ -41,6 +41,19 @@ final class Controller(
   }
 
 
+  def masaPlay(id: Masa.Id, req: RequestHeader, emit: ClientEmit) = WebSocket(req) { sri => user =>
+    Future successful endpoint(
+      name = "masa/play",
+      behavior = MasaClientActor.start(
+        RoomActor.State(RoomId(id)),
+        None
+      ) { Deps(emit, Req(req, sri, user), services) },
+      credits = 100,
+      interval = 20.seconds
+    )
+  }
+
+
 
   private def WebSocket(req: RequestHeader)(f: Sri => Option[User] => Response): Response =
     ValidSri(req) { sri =>

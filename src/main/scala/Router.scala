@@ -11,6 +11,8 @@ final class Router(controller: Controller) {
     req.path drop 1 split "/" match {
       case Array("lobby", "socket") => controller.lobby(req, emit)
       case Array("lobby", "socket", _) => controller.lobby(req, emit)
+      case Array("play", id) => 
+        controller.masaPlay(Masa.Id(id), req, emit)
       case _ => Future successful Left(HttpResponseStatus.NOT_FOUND)
     }
 

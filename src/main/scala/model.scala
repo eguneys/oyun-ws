@@ -1,5 +1,6 @@
 package oyun.ws
 
+import poker.Side
 
 trait StringValue extends Any {
   def value: String
@@ -14,6 +15,23 @@ case class User(id: User.ID) extends AnyVal
 
 object User {
   type ID = String
+}
+
+object Masa {
+
+  case class Id(value: String) extends AnyVal with StringValue {
+    def full(userId: User.ID) = FullId(s"$value$userId")
+  }
+
+  case class FullId(value: String) extends AnyVal with StringValue {
+    def masaId = Id(value take 8)
+    def userId = value drop 8
+  }
+
+  case class MasaPlayer(side: Side) {
+
+  }
+
 }
 
 

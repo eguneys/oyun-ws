@@ -37,7 +37,6 @@ extends WebSocketServerProtocolHandler(
   override def userEventTriggered(ctx: ChannelHandlerContext, evt: java.lang.Object): Unit = {
     evt match {
       case hs: WebSocketServerProtocolHandler.HandshakeComplete =>
-        // logger.info("handshake complete")
         val promise = Promise[Client]
         ctx.channel.attr(key.client).set(promise.future)
         router(
