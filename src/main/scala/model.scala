@@ -67,3 +67,7 @@ object RoomId {
 }
 
 case class ReqId(value: Int) extends AnyVal with IntValue
+
+case class MasaEventFlags(
+  player: Option[poker.Side]
+)

@@ -25,7 +25,25 @@ final class OyunHandler(
     case msg => logger.warn(s"Unhandled lobby: $msg")
   }
 
+  private val masaHandler: Emit[OyunOut] = {
+    implicit def masaRoomId(masaId: Masa.Id): RoomId = RoomId(masaId)
+    ({
+      case MasaVersion(masaId, version, flags, tpe, data) =>
+        val versioned = ClientIn.MasaVersioned(version, flags, tpe, data)
+        // History.round.add(masaId, versioned)
+        publish(_ room masaId, versioned)
+      case msg => roomHandler(msg)
+    })
+  }
+
+  private val roomHandler: Emit[OyunOut] = {
+    case msg => logger.warn(s"Unhandled room: $msg")
+  }
+
+
   oyun.setHandlers({
     case Oyun.chans.lobby.out => lobbyHandler
+    case Oyun.chans.masa.out => masaHandler
+    case chan => in => logger.warn(s"Unknown channel $chan sent $in")
   })
 }

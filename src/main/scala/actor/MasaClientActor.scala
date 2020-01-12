@@ -33,6 +33,9 @@ object MasaClientActor {
     apply(state, deps)
   }
 
+  def versionFor(state: State, msg: ClientIn.MasaVersioned): ClientIn.Payload =
+    msg.full
+
   private def apply(state: State, deps: Deps): Behavior[ClientMsg] =
     Behaviors
       .receive[ClientMsg] { (ctx, msg) =>
@@ -44,7 +47,9 @@ object MasaClientActor {
         }
 
         msg match {
-
+          case versioned: ClientIn.MasaVersioned =>
+            clientIn(versionFor(state, versioned))
+            Behaviors.same
           case ClientOut.MasaPlayerForward(payload) =>
             fullId foreach { fid =>
               oyunIn.masa(OyunIn.MasaPlayerDo(fid, payload))
@@ -53,6 +58,11 @@ object MasaClientActor {
           case ClientOut.MasaSit(side) =>
             fullId foreach { fid =>
               oyunIn.masa(OyunIn.MasaSit(fid, side))
+            }
+            Behaviors.same
+          case ClientOut.MasaSitOutNext(value) =>
+            state.player foreach { player =>
+              oyunIn.masa(OyunIn.MasaSitOutNext(masaId, player.side, value))
             }
             Behaviors.same
           case msg: ClientOutSite =>

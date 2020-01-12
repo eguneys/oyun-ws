@@ -31,6 +31,7 @@ object ClientOut {
 
   case class MasaPlayerForward(payload: JsValue) extends ClientOutMasa
   case class MasaSit(side: String) extends ClientOutMasa
+  case class MasaSitOutNext(value: Boolean) extends ClientOutMasa
 
   def parse(str: String): Try[ClientOut] =
     if (str == "null" || str == """{"t":"p"}""") emptyPing
@@ -45,6 +46,8 @@ object ClientOut {
               for {
                 side <- o str "d"
               } yield MasaSit(side)
+            case "sitoutNext" =>
+              o boolean "d" map MasaSitOutNext.apply
             case _ => None
           } getOrElse Unexpected(o)
         case js => Unexpected(js)

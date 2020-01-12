@@ -3,6 +3,8 @@ package ipc
 
 import play.api.libs.json._
 
+import poker.Side
+
 sealed trait OyunIn {
   def write: String
   def critical: Boolean = false // will be buffered and reset after oyun reboots
@@ -46,7 +48,12 @@ object OyunIn {
     def write = s"m/sit $fullId $side"
   }
 
+  case class MasaSitOutNext(masaId: Masa.Id, side: Side, value: Boolean) extends Masa {
+    def write = s"m/sitoutnext $masaId ${writeSide(side)} ${boolean(value)}"
+  }
 
   private def commas(as: Iterable[Any]): String = if (as.isEmpty) "-" else as mkString ","
+  private def boolean(b: Boolean): String = if (b) "+" else "-"
   private def optional(s: Option[String]): String = s getOrElse "-"
+  private def writeSide(s: Side): String = s.index.toString
 }
