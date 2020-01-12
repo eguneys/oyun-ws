@@ -28,6 +28,9 @@ object OyunOut {
     tpe: String,
     data: JsonString) extends MasaOut
   
+  case class MasaPlayerStore(
+    masaId: Masa.Id,
+    store: Masa.PlayerStore) extends MasaOut
 
   // impl
 
@@ -53,6 +56,11 @@ object OyunOut {
               )
               MasaVersion(Masa.Id(roomId), SocketVersion(sv), flags, tpe, JsonString(data))
             }
+        }
+      case "m/players" =>
+        get(args, 2) {
+          case Array(masaId, value) =>
+            Some(MasaPlayerStore(Masa.Id(masaId), Masa.PlayerStore(value)))
         }
     }
   }

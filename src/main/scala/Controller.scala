@@ -45,8 +45,7 @@ final class Controller(
     Future successful endpoint(
       name = "masa/play",
       behavior = MasaClientActor.start(
-        RoomActor.State(RoomId(id)),
-        None
+        RoomActor.State(RoomId(id))
       ) { Deps(emit, Req(req, sri, user), services) },
       credits = 100,
       interval = 20.seconds

@@ -15,7 +15,6 @@ object MasaClientActor {
 
   case class State(
     room: RoomActor.State,
-    player: Option[Masa.MasaPlayer],
     site: ClientActor.State = ClientActor.State()) {
 
     def busChans: List[Bus.Chan] =
@@ -23,10 +22,9 @@ object MasaClientActor {
   }
 
   def start(
-    roomState: RoomActor.State,
-    player: Option[Masa.MasaPlayer])(deps: Deps): Behavior[ClientMsg] = Behaviors.setup { ctx =>
+    roomState: RoomActor.State)(deps: Deps): Behavior[ClientMsg] = Behaviors.setup { ctx =>
     import deps._
-    val state = State(roomState, player)
+    val state = State(roomState)
     onStart(deps, ctx)
     req.user foreach { users.connect(_, ctx.self) }
     state.busChans foreach { Bus.subscribe(_, ctx.self) }
@@ -46,6 +44,10 @@ object MasaClientActor {
           masaId.full(uid)
         }
 
+        def oPlayer = req.userId flatMap { uid =>
+          MasaCache.masa.get(masaId, uid)
+        }
+
         msg match {
           case versioned: ClientIn.MasaVersioned =>
             clientIn(versionFor(state, versioned))
@@ -61,7 +63,7 @@ object MasaClientActor {
             }
             Behaviors.same
           case ClientOut.MasaSitOutNext(value) =>
-            state.player foreach { player =>
+            oPlayer foreach { player =>
               oyunIn.masa(OyunIn.MasaSitOutNext(masaId, player.side, value))
             }
             Behaviors.same

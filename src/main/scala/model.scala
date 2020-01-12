@@ -28,10 +28,27 @@ object Masa {
     def userId = value drop 8
   }
 
-  case class MasaPlayer(side: Side) {
+  case class MasaPlayer(userId: User.ID, side: Side) {
 
   }
 
+  case class PlayerStore(players: Map[User.ID, MasaPlayer]) {
+    def apply(userId: User.ID): Option[MasaPlayer] = 
+      players.get(userId)
+  }
+
+  object PlayerStore {
+
+    def apply(value: String): PlayerStore = {
+      val uids = value split ','
+      val players = (uids zip Side.all).map {
+        case ("", side) => None
+        case (uid, side) => Some(MasaPlayer(uid, side))
+      }.flatten
+      PlayerStore(players.map { p => p.userId -> p }.to(Map))
+    }
+
+  }
 }
 
 
