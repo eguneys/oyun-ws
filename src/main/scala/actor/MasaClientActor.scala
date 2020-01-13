@@ -22,12 +22,20 @@ object MasaClientActor {
   }
 
   def start(
-    roomState: RoomActor.State)(deps: Deps): Behavior[ClientMsg] = Behaviors.setup { ctx =>
+    roomState: RoomActor.State,
+    fromVersion: Option[SocketVersion])(deps: Deps): Behavior[ClientMsg] = Behaviors.setup { ctx =>
     import deps._
     val state = State(roomState)
     onStart(deps, ctx)
     req.user foreach { users.connect(_, ctx.self) }
     state.busChans foreach { Bus.subscribe(_, ctx.self) }
+    History.masa.getFrom(Masa.Id(roomState.id.value), fromVersion) match {
+      case None => clientIn(ClientIn.Resync)
+      case Some(events) => {
+        println(events)
+        events map { versionFor(state, _) } foreach clientIn
+      }
+    }
     apply(state, deps)
   }
 

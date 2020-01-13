@@ -45,7 +45,8 @@ final class Controller(
     Future successful endpoint(
       name = "masa/play",
       behavior = MasaClientActor.start(
-        RoomActor.State(RoomId(id))
+        RoomActor.State(RoomId(id)),
+        fromVersion(req)
       ) { Deps(emit, Req(req, sri, user), services) },
       credits = 100,
       interval = 20.seconds
@@ -65,6 +66,9 @@ final class Controller(
   }
 
   // private def notFound = Left(HttpResponseStatus.NOT_FOUND)
+
+  private def fromVersion(req: RequestHeader): Option[SocketVersion] =
+    req queryParameter "v" flatMap (_.toIntOption) map SocketVersion.apply
 
 }
 

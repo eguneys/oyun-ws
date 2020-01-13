@@ -30,7 +30,7 @@ final class OyunHandler(
     ({
       case MasaVersion(masaId, version, flags, tpe, data) =>
         val versioned = ClientIn.MasaVersioned(version, flags, tpe, data)
-        // History.round.add(masaId, versioned)
+        History.masa.add(masaId, versioned)
         publish(_ room masaId, versioned)
       case MasaPlayerStore(masaId, store) =>
         MasaCache.masa.add(masaId, store)

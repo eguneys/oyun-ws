@@ -33,7 +33,7 @@ final class Auth(mongo: Mongo)(implicit executionContext: ExecutionContext) {
     req cookie cookieName flatMap {
       case sessionIdRegex(id) => Some(id)
       case _ => None
-    } orElse 
+    } orElse
       req.queryParameter(sessionIdKey)
 
 }

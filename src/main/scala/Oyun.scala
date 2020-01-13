@@ -80,7 +80,7 @@ final class Oyun(config: Config)
     val emit: Emit[In] = in => {
       val msg = in.write
       val path = msg.takeWhile(' '.!=)
-      println(s"${chan.out} $msg")
+      // logger.info(s"${chan.in} $msg")
       if (status.isOnline) {
         connIn.async.publish(chan.in, msg)
       } else if (in.critical) {
@@ -105,6 +105,7 @@ final class Oyun(config: Config)
     override def message(chan: String, msg: String): Unit = {
       OyunOut read msg match {
         case Some(out) => 
+          // logger.info(s"$chan, $out")
           handlers(chan)(out)
         case None => logger.warn(s"Can't parse $msg on $chan")
       }
