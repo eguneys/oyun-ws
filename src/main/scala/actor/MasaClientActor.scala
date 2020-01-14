@@ -29,18 +29,26 @@ object MasaClientActor {
     onStart(deps, ctx)
     req.user foreach { users.connect(_, ctx.self) }
     state.busChans foreach { Bus.subscribe(_, ctx.self) }
+
+    def masaId = Masa.Id(state.room.id.value)
+
+    def oPlayer = req.userId flatMap { uid =>
+      MasaCache.masa.get(masaId, uid)
+    }
+
     History.masa.getFrom(Masa.Id(roomState.id.value), fromVersion) match {
       case None => clientIn(ClientIn.Resync)
       case Some(events) => {
-        println(events)
-        events map { versionFor(state, _) } foreach clientIn
+        events map { versionFor(state, oPlayer, _) } foreach clientIn
       }
     }
     apply(state, deps)
   }
 
-  def versionFor(state: State, msg: ClientIn.MasaVersioned): ClientIn.Payload =
-    msg.full
+  def versionFor(state: State, oPlayer: Option[Masa.MasaPlayer], msg: ClientIn.MasaVersioned): ClientIn.Payload = {
+    if (msg.flags.player.exists(s => oPlayer.fold(true)(_.side != s))) msg.skip
+    else msg.full
+  }
 
   private def apply(state: State, deps: Deps): Behavior[ClientMsg] =
     Behaviors
@@ -58,7 +66,7 @@ object MasaClientActor {
 
         msg match {
           case versioned: ClientIn.MasaVersioned =>
-            clientIn(versionFor(state, versioned))
+            clientIn(versionFor(state, oPlayer, versioned))
             Behaviors.same
           case ClientOut.MasaPlayerForward(payload) =>
             fullId foreach { fid =>

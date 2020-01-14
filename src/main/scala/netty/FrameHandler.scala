@@ -22,7 +22,7 @@ extends SimpleChannelInboundHandler[WebSocketFrame] {
   ) = anyFrame match {
     case frame: TextWebSocketFrame =>
       val txt = frame.text
-      if (txt.nonEmpty) {
+      if (txt.nonEmpty){  
         val limiter = ctx.channel.attr(key.limit).get
         if (limiter == null || limiter(txt)) ClientOut parse txt foreach {
           case ClientOut.Unexpected(msg) =>
