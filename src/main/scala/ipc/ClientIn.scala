@@ -49,6 +49,11 @@ object ClientIn {
     lazy val skip = Payload(JsonString(s"""{"v":$version}"""))
   }
 
+  case class Ack(id: Option[Int]) extends ClientIn {
+    def write = id.fold(cliMsg("ack")) { cliMsg("ack", _) }
+  }
+
+
   // private def cliMsg[A: Writes](t: String, data: A): String = Json stringify Json.obj(
   //   "t" -> t,
   //   "d" -> data
@@ -57,7 +62,7 @@ object ClientIn {
   // private def cliMsg(t: String, data: JsonString): String = s"""{"t":"$t","d":${data.value}}"""
   private def cliMsg(t: String, data: JsonString, version: SocketVersion): String =
     s"""{"t":"$t","v":$version,"d":${data.value}}"""
-  // private def cliMsg(t: String, int: Int): String      = s"""{"t":"$t","d":$int}"""
+  private def cliMsg(t: String, int: Int): String      = s"""{"t":"$t","d":$int}"""
   // private def cliMsg(t: String, bool: Boolean): String = s"""{"t":"$t","d":$bool}"""
   private def cliMsg(t: String): String                = s"""{"t":"$t"}"""
   

@@ -73,6 +73,12 @@ object MasaClientActor {
               oyunIn.masa(OyunIn.MasaPlayerDo(fid, payload))
             }
             Behaviors.same
+          case ClientOut.MasaMove(uci, ackId) =>
+            fullId foreach { fid =>
+              clientIn(ClientIn.Ack(ackId))
+              oyunIn.masa(OyunIn.MasaMove(fid, uci))
+            }
+            Behaviors.same
           case ClientOut.MasaSit(side) =>
             fullId foreach { fid =>
               oyunIn.masa(OyunIn.MasaSit(fid, side))

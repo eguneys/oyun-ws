@@ -38,6 +38,9 @@ final class Monitor(config: Config,
     services.lobby.pong.update(members, rounds)
 
     connection.current update members
+    historyMasaSize.update(History.masa.size)
+    masaCacheSize.update(MasaCache.masa.size)
+    busSize.update(Bus.size)
     
   }
 
@@ -51,5 +54,11 @@ object Monitor {
   object connection {
     val current = Kamon.gauge("connection.current").withoutTags
   }
+
+  val historyMasaSize = Kamon.gauge("history.masa.size").withoutTags
+
+  val masaCacheSize = Kamon.gauge("cache.masa.size").withoutTags
+
+  val busSize = Kamon.gauge("bus.size").withoutTags
   
 }

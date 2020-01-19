@@ -1,6 +1,8 @@
 package oyun.ws
 package ipc
 
+import poker.format.{ Uci }
+
 import play.api.libs.json._
 
 import poker.Side
@@ -42,6 +44,12 @@ object OyunIn {
 
   case class MasaPlayerDo(fullId: Masa.FullId, payload: JsValue) extends Masa {
     def write = s"m/do $fullId ${Json.stringify(payload)}"
+  }
+
+  case class MasaMove(fullId: Masa.FullId, uci: Uci) extends Masa {
+    def write =
+      s"m/move $fullId ${uci.uci}"
+    override def critical = true
   }
 
   case class MasaSit(fullId: Masa.FullId, side: String) extends Masa {

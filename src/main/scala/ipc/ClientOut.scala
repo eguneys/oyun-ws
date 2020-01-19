@@ -1,6 +1,7 @@
 package oyun.ws
 package ipc
 
+import poker.format.{ Uci }
 import play.api.libs.json._
 import scala.util.{ Success, Try }
 
@@ -30,6 +31,7 @@ object ClientOut {
   // round
 
   case class MasaPlayerForward(payload: JsValue) extends ClientOutMasa
+  case class MasaMove(uci: Uci, ackId: Option[Int]) extends ClientOutMasa
   case class MasaSit(side: String) extends ClientOutMasa
   case class MasaSitOutNext(value: Boolean) extends ClientOutMasa
 
@@ -40,6 +42,14 @@ object ClientOut {
         case o: JsObject =>
           o str "t" flatMap {
             case "p" => Some(Ping(o int "l"))
+
+            // round
+            case "move" =>
+              for {
+                d <- o obj "d"
+                move <- d str "u" flatMap Uci.Move.apply
+                ackId = d int "a"
+              } yield MasaMove(move, ackId)
             case "join" | "hookIn" | "hookOut" =>
               Some(LobbyForward(o))
             case "sit" =>
