@@ -67,6 +67,7 @@ object MasaClientActor {
         }
 
         msg match {
+          case ctrl: ClientCtrl => socketControl(state.site, deps, ctrl)
           case versioned: ClientIn.MasaVersioned =>
             clientIn(versionFor(state, oPlayer, versioned))
             Behaviors.same

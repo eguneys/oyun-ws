@@ -10,10 +10,15 @@ sealed trait LobbyOut extends OyunOut
 sealed trait RoomOut extends OyunOut
 sealed trait MasaOut extends RoomOut
 
+sealed trait AnyRoomOut extends MasaOut
+
 object OyunOut {
 
   // site
   case class TellSri(sri: Sri, json: JsonString) extends SiteOut with LobbyOut
+
+  // room
+  case class RoomStop(roomId: RoomId) extends AnyRoomOut
 
   // lobby
   case class TellLobby(json: JsonString) extends LobbyOut
@@ -47,6 +52,10 @@ object OyunOut {
         get(args, 2) {
           case Array(sri, payload) => Some(TellSri(Sri(sri), JsonString(payload)))
         }
+
+      case "room/stop" =>
+        Some(RoomStop(RoomId(args)))
+
       case "m/ver" =>
         get(args, 6) {
           case Array(roomId, version, f, only, tpe, data) =>

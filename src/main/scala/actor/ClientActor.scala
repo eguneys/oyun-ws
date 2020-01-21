@@ -1,7 +1,7 @@
 package oyun.ws
 
-import akka.actor.typed.scaladsl.{ ActorContext }//, Behaviors }
-// import akka.actor.typed.Behavior
+import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
+import akka.actor.typed.Behavior
 
 import ipc._
 import util.Util.nowSeconds
@@ -23,9 +23,15 @@ object ClientActor {
     busChansOf(req) foreach { Bus.unsubscribe(_, ctx.self) }
   }
 
+  def socketControl(state: State, deps: Deps, msg: ClientCtrl): Behavior[ClientMsg] = msg match {
+    case ClientCtrl.Broom(oldSeconds) =>
+      Behaviors.same
+    case ClientCtrl.Disconnect =>
+      deps.clientIn(ClientIn.Disconnect)
+      Behaviors.stopped
+  }
+
   def sitePing(state: State, deps: Deps, msg: ClientOut.Ping): State = {
-    // for { l <- msg.lag, u <- deps.req.user } 
-    //   deps.services.lag(u.id -> l)
     state.copy(lastPing = nowSeconds)
   }
 

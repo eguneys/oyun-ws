@@ -27,6 +27,7 @@ final class OyunHandler(
 
   private val masaHandler: Emit[OyunOut] = {
     implicit def masaRoomId(masaId: Masa.Id): RoomId = RoomId(masaId)
+    implicit def roomMasaId(roomId: RoomId): Masa.Id = Masa.Id(roomId.value)
     ({
       case MasaVersion(masaId, version, flags, tpe, data) =>
         val versioned = ClientIn.MasaVersioned(version, flags, tpe, data)
@@ -34,6 +35,9 @@ final class OyunHandler(
         publish(_ room masaId, versioned)
       case MasaPlayerStore(masaId, store) =>
         MasaCache.masa.add(masaId, store)
+      case RoomStop(roomId) =>
+        History.masa.stop(roomId)
+        publish(_ room roomId, ClientCtrl.Disconnect)
       case msg => roomHandler(msg)
     })
   }
