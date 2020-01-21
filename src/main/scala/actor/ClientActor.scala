@@ -81,7 +81,7 @@ object ClientActor {
 
     def oyunIn = services.oyun
     def users = services.users
-
+    def roundCrowd = services.roundCrowd
   }
   
 }

@@ -87,7 +87,7 @@ final class Oyun(config: Config)
         buffer.enqueue(chan.in, msg)
       } else {
         // dropped
-        logger.info(s"[redis.drop] $chan.in, $path")
+        logger.info(s"[redis.drop] $chan.in, $path") 
       }
     }
 

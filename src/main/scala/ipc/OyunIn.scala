@@ -60,6 +60,13 @@ object OyunIn {
     def write = s"m/sitoutnext $masaId ${writeSide(side)} ${boolean(value)}"
   }
 
+  case class RoundOnlines(many: Iterable[RoundCrowd.Output]) extends Masa {
+    private def one(r: RoundCrowd.Output) =
+      if (r.isEmpty) r.room.roomId.value
+      else s"${r.room.roomId}${r.room.members}"
+    def write = s"r/ons ${commas(many map one)}"
+  }
+
   private def commas(as: Iterable[Any]): String = if (as.isEmpty) "-" else as mkString ","
   private def boolean(b: Boolean): String = if (b) "+" else "-"
   private def optional(s: Option[String]): String = s getOrElse "-"

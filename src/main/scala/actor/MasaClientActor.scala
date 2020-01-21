@@ -36,6 +36,8 @@ object MasaClientActor {
       MasaCache.masa.get(masaId, uid)
     }
 
+    roundCrowd.connect(roomState.id, req.user, oPlayer.map(_.side))
+
     History.masa.getFrom(Masa.Id(roomState.id.value), fromVersion) match {
       case None => clientIn(ClientIn.Resync)
       case Some(events) => {
@@ -99,8 +101,15 @@ object MasaClientActor {
         }
       }.receiveSignal {
         case (ctx, PostStop) =>
+
+          def player = deps.req.userId flatMap { uid =>
+            val masaId = Masa.Id(state.room.id.value)
+            MasaCache.masa.get(masaId, uid)
+          }
+
           onStop(state.site, deps, ctx)
           state.busChans foreach { Bus.unsubscribe(_, ctx.self) }
+          deps.roundCrowd.disconnect(state.room.id, deps.req.user, player.map(_.side))
           Behaviors.same
       }
 

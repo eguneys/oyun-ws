@@ -40,6 +40,7 @@ final class Monitor(config: Config,
     connection.current update members
     historyMasaSize.update(History.masa.size)
     masaCacheSize.update(MasaCache.masa.size)
+    crowdRoundSize.update(rounds)
     busSize.update(Bus.size)
     
   }
@@ -58,6 +59,7 @@ object Monitor {
   val historyMasaSize = Kamon.gauge("history.masa.size").withoutTags
 
   val masaCacheSize = Kamon.gauge("cache.masa.size").withoutTags
+  val crowdRoundSize = Kamon.gauge("crowd.round.size").withoutTags
 
   val busSize = Kamon.gauge("bus.size").withoutTags
   
