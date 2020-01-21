@@ -32,6 +32,7 @@ object OyunOut {
     flags: MasaEventFlags,
     tpe: String,
     data: JsonString) extends MasaOut
+  case class MasaResyncPlayer(fullId: Masa.FullId) extends MasaOut
   
   case class MasaPlayerStore(
     masaId: Masa.Id,
@@ -66,6 +67,7 @@ object OyunOut {
               MasaVersion(Masa.Id(roomId), SocketVersion(sv), flags, tpe, JsonString(data))
             }
         }
+      case "m/resync/player" => Some(MasaResyncPlayer(Masa.FullId(args)))
       case "m/players" =>
         get(args, 2) {
           case Array(masaId, value) =>

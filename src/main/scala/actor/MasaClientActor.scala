@@ -71,6 +71,9 @@ object MasaClientActor {
           case versioned: ClientIn.MasaVersioned =>
             clientIn(versionFor(state, oPlayer, versioned))
             Behaviors.same
+          case resync: ClientIn.MasaResyncPlayer =>
+            if (oPlayer.exists(_.userId == resync.userId)) clientIn(resync)
+            Behaviors.same
           case ClientOut.MasaPlayerForward(payload) =>
             fullId foreach { fid =>
               oyunIn.masa(OyunIn.MasaPlayerDo(fid, payload))

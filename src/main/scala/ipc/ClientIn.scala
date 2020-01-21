@@ -53,6 +53,10 @@ object ClientIn {
     def write = id.fold(cliMsg("ack")) { cliMsg("ack", _) }
   }
 
+  case class MasaResyncPlayer(userId: String) extends ClientIn {
+    def write = cliMsg("resync")
+  }
+
 
   // private def cliMsg[A: Writes](t: String, data: A): String = Json stringify Json.obj(
   //   "t" -> t,
